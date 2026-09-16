@@ -23,8 +23,9 @@ describe('validatePriorWorkdaysForCheckIn', () => {
     const result = validatePriorWorkdaysForCheckIn('2026-08-05', [], settings, [])
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error).toContain('Mon')
-      expect(result.error).toContain('Tue')
+      expect(result.error).toMatch(/Please log your time from/)
+      expect(result.error).toMatch(/3/)
+      expect(result.error).toMatch(/4/)
     }
   })
 
@@ -45,6 +46,9 @@ describe('validatePriorWorkdaysForCheckIn', () => {
     const timeOff = [{ date: '2026-08-03', type: 'half-day' as const, note: 'Doctor' }]
     const result = validatePriorWorkdaysForCheckIn('2026-08-04', [], settings, timeOff)
     expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error).toMatch(/Please log your time for/)
+    }
   })
 
   it('allows later days when prior half-day has a completed session', () => {
@@ -86,6 +90,27 @@ describe('validatePriorWorkdaysForCheckIn', () => {
     const sessions = [{ id: '1', date: '2026-08-03', checkIn: 0, checkOut: null }]
     const result = validateOpenSessionBlocksFollowingDays('2026-08-05', sessions)
     expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error).toMatch(/Check out/)
+      expect(result.error).toMatch(/Mon/)
+    }
+  })
+
+  it('mentions pending checkout and unfilled later workdays together', () => {
+    // Friday 11 Sep 2026 open, then Mon 14 + Tue 15 empty, check-in on Wed 16
+    const sessions = [{ id: 'open', date: '2026-09-11', checkIn: 0, checkOut: null }]
+    const result = validatePriorWorkdaysForCheckIn('2026-09-16', sessions, settings, [])
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error).toMatch(/check-out/i)
+      expect(result.error).toMatch(/Fri/)
+      expect(result.error).toMatch(/11/)
+      expect(result.error).toMatch(/Please log your time from/)
+      expect(result.error).toMatch(/14/)
+      expect(result.error).toMatch(/15/)
+      expect(result.error).not.toMatch(/Monday/)
+      expect(result.error).not.toMatch(/Tuesday/)
+    }
   })
 
   it('allows updating days on or before the open session date', () => {

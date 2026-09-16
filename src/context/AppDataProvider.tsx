@@ -86,9 +86,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     let result: ValidationResult = { ok: true }
     setState((prev) => {
       const now = Date.now()
-      result = validateOpenSessionBlocksFollowingDays(date, prev.sessions)
-      if (!result.ok) return prev
       result = validatePriorWorkdaysInWeek(date, prev.sessions, prev.settings, prev.timeOff)
+      if (!result.ok) return prev
+      result = validateOpenSessionBlocksFollowingDays(date, prev.sessions)
       if (!result.ok) return prev
       const candidate: SessionInput = { date, checkIn: time, checkOut: null }
       result = validateSession(candidate, prev.sessions, undefined, now)
@@ -124,14 +124,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setState((prev) => {
       const now = Date.now()
       if (!input.id) {
-        result = validateOpenSessionBlocksFollowingDays(input.date, prev.sessions)
-        if (!result.ok) return prev
         result = validatePriorWorkdaysInWeek(input.date, prev.sessions, prev.settings, prev.timeOff)
+        if (!result.ok) return prev
+        result = validateOpenSessionBlocksFollowingDays(input.date, prev.sessions)
         if (!result.ok) return prev
       } else if (input.checkOut === null) {
-        result = validateOpenSessionBlocksFollowingDays(input.date, prev.sessions)
-        if (!result.ok) return prev
         result = validatePriorWorkdaysInWeek(input.date, prev.sessions, prev.settings, prev.timeOff)
+        if (!result.ok) return prev
+        result = validateOpenSessionBlocksFollowingDays(input.date, prev.sessions)
         if (!result.ok) return prev
       }
       result = validateSession(input, prev.sessions, input.id, now)
@@ -181,9 +181,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       if (!result.ok) return prev
       const alreadyMarked = prev.timeOff.some((item) => item.date === entry.date)
       if (!alreadyMarked) {
-        result = validateOpenSessionBlocksFollowingDays(entry.date, prev.sessions)
-        if (!result.ok) return prev
         result = validatePriorWorkdaysInWeek(entry.date, prev.sessions, prev.settings, prev.timeOff)
+        if (!result.ok) return prev
+        result = validateOpenSessionBlocksFollowingDays(entry.date, prev.sessions)
         if (!result.ok) return prev
       }
       const afford = canAffordLeaveQuota(prev.timeOff, prev.settings, entry.date, entry.type)
@@ -235,9 +235,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
           result = { ok: false, error: 'Add a session to restore this workday.' }
           return prev
         }
-        result = validateOpenSessionBlocksFollowingDays(sessionInput.date, prev.sessions)
-        if (!result.ok) return prev
         result = validatePriorWorkdaysInWeek(sessionInput.date, prev.sessions, prev.settings, prev.timeOff)
+        if (!result.ok) return prev
+        result = validateOpenSessionBlocksFollowingDays(sessionInput.date, prev.sessions)
         if (!result.ok) return prev
         result = validateSession(sessionInput, prev.sessions, undefined, now)
         if (!result.ok) return prev

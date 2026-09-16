@@ -1,5 +1,5 @@
 import type { ISODate, Session, Settings, TimeOffEntry, WeekdayIndex } from '../types'
-import { addDays, formatDayLabel, parseISODate, startOfWeek, toISODate } from './date'
+import { addDays, formatDayLabel, formatMonthDay, parseISODate, startOfWeek, toISODate } from './date'
 import { isWorkday } from './coverage'
 
 export interface SessionInput {
@@ -60,21 +60,60 @@ export function getUnresolvedPriorWorkdays(
   return unresolved
 }
 
+function fillRangeLabel(dates: ISODate[]): string {
+  const first = formatMonthDay(parseISODate(dates[0]))
+  const last = formatMonthDay(parseISODate(dates[dates.length - 1]))
+  if (dates.length === 1 || first === last) return first
+  return `${first} to ${last}`
+}
+
+export function getPriorWorkBlockMessages(
+  date: ISODate,
+  sessions: Session[],
+  settings: Settings,
+  timeOff: TimeOffEntry[],
+): string[] {
+  const openSession = sessions.find((s) => s.checkOut === null)
+  const checkoutPending = Boolean(openSession && date > openSession.date)
+  const unfilled = getUnresolvedPriorWorkdays(date, sessions, settings, timeOff).filter(
+    (d) => d !== openSession?.date,
+  )
+
+  const messages: string[] = []
+  if (checkoutPending && openSession) {
+    messages.push(`Your check-out for ${formatDayLabel(parseISODate(openSession.date))} is pending.`)
+  } 
+  if (unfilled.length > 0) {
+    const range = fillRangeLabel(unfilled)
+    messages.push(
+      unfilled.length === 1
+        ? `Please log your time for ${range}.`
+        : `Please log your time from ${range}.`,
+    )
+  }
+  return messages
+}
+
+/** Combined user-facing reason when check-in is blocked by an open checkout or empty prior workdays. */
+export function formatPriorWorkBlockMessage(
+  date: ISODate,
+  sessions: Session[],
+  settings: Settings,
+  timeOff: TimeOffEntry[],
+): string | null {
+  const messages = getPriorWorkBlockMessages(date, sessions, settings, timeOff)
+  return messages.length > 0 ? messages.join(' ') : null
+}
+
 export function validatePriorWorkdaysInWeek(
   date: ISODate,
   sessions: Session[],
   settings: Settings,
   timeOff: TimeOffEntry[],
 ): ValidationResult {
-  const unresolved = getUnresolvedPriorWorkdays(date, sessions, settings, timeOff)
-  if (unresolved.length === 0) return { ok: true }
-
-  const labels = unresolved.map((d) => formatDayLabel(parseISODate(d))).join(', ')
-  const dayLabel = formatDayLabel(parseISODate(date))
-  return {
-    ok: false,
-    error: `Before updating ${dayLabel}, please log time or mark leave/holiday for previous workdays: ${labels}. Half-day days also need a session logged.`,
-  }
+  const error = formatPriorWorkBlockMessage(date, sessions, settings, timeOff)
+  if (!error) return { ok: true }
+  return { ok: false, error }
 }
 
 /** Past days can only be marked half-day after a completed session exists for that day. */
@@ -118,11 +157,9 @@ export function validateOpenSessionBlocksFollowingDays(date: ISODate, sessions: 
   if (!openSession) return { ok: true }
   if (date <= openSession.date) return { ok: true }
 
-  const dayLabel = formatDayLabel(parseISODate(date))
-  const openLabel = formatDayLabel(parseISODate(openSession.date))
   return {
     ok: false,
-    error: `Check out from ${openLabel} before updating ${dayLabel}.`,
+    error: `Check out ${formatDayLabel(parseISODate(openSession.date))}.`,
   }
 }
 

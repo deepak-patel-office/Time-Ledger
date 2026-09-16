@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { useAppData } from '../../context/useAppData'
 import { computeDailyCheckoutFromCheckIn, computeRecommendedCheckout, isFullDayOff } from '../../lib/coverage'
-import { getUnresolvedPriorWorkdays, hasCompletedSessionForDate, isDayBlockedByOpenSession } from '../../lib/sessions'
+import { getPriorWorkBlockMessages, getUnresolvedPriorWorkdays, hasCompletedSessionForDate, isDayBlockedByOpenSession } from '../../lib/sessions'
 import { formatDayLabel, formatDurationMs, formatTimeOfDay, parseISODate, toISODate } from '../../lib/date'
 import type { DayStats, DayTimeOffChoice, Session, TimeOffType } from '../../types'
 import { ProgressBar } from '../shared/ProgressBar'
@@ -77,7 +77,8 @@ export function DayCard({
   const openSessionBlocksDay = isDayBlockedByOpenSession(stats.date, sessions)
   const hasOpenSessionOnDay = openSession?.date === stats.date || stats.hasOpenSession
   const actionsBlocked = isFutureDay || priorDaysBlocked || openSessionBlocksDay
-  const showCompletionWarning = isToday && canTrackTime && (priorDaysBlocked || openSessionBlocksDay)
+  const blockMessages = getPriorWorkBlockMessages(stats.date, sessions, settings, timeOff)
+  const showCompletionWarning = isToday && canTrackTime && blockMessages.length > 0
 
   function applyTimeOff(type: TimeOffType, reason: string) {
     const result = setTimeOff({
@@ -365,12 +366,16 @@ export function DayCard({
         )}
 
         <div className="flex flex-col gap-1.5">
-          {showCompletionWarning && (
-            <div className="flex items-start gap-1.5 rounded-[var(--radius)] p-2 text-sm tone-warn text-[var(--warn)]">
-              <CalendarX2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              <span>Please complete prior workdays in this week first.</span>
-            </div>
-          )}
+          {showCompletionWarning &&
+            blockMessages.map((message) => (
+              <div
+                key={message}
+                className="flex items-start gap-1.5 rounded-[var(--radius)] p-2 text-sm tone-warn text-[var(--warn)]"
+              >
+                <CalendarX2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>{message}</span>
+              </div>
+            ))}
 
           {!isFutureDay && (
             <div className="flex items-center justify-between gap-2">
