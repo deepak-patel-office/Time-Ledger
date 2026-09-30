@@ -181,43 +181,43 @@ export function DayCard({
     >
       <div>
         {/* Header - Compact & Clean */}
-        <div className="mb-3 flex items-center justify-between border-b border-[var(--border)] pb-2.5">
+        <div className="mb-3 flex flex-col gap-2 border-b border-[var(--border)] pb-2.5">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
-            <h3 className="app-heading text-[0.9375rem]">
+            <h3 className="app-heading whitespace-nowrap text-[0.9375rem]">
               {formatDayLabel(parseISODate(stats.date))}
             </h3>
             {isToday && (
-              <span className="chip" style={{ background: 'var(--accent)', color: '#fff' }}>
-                <Sparkles className="h-3.5 w-3.5" />
+              <span className="pill" style={{ background: 'var(--accent)', color: '#fff' }}>
+                <Sparkles />
                 Today
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-1.5">
-            {canTrackTime && (
-              <>
-                {isHalfDay && (
-                  <span className="chip chip-warn">
-                    <CloudSun className="h-3.5 w-3.5" />
-                    Half day
-                  </span>
-                )}
-                {stats.status !== 'half-day' && (
-                  <StatusBadge status={stats.status} deltaMs={stats.deltaMs} targetMs={stats.targetMs} />
-                )}
-              </>
-            )}
-            {isFullOff && (
-              <span
-                className={`chip ${isLeave ? 'chip-leave' : 'chip-muted'}`}
-              >
-                {isLeave ? <Palmtree className="h-3 w-3" /> : <Sun className="h-3 w-3" />}
-                {isLeave ? 'Leave' : 'Holiday'}
-              </span>
-            )}
-          </div>
+          {(canTrackTime || isFullOff) && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {canTrackTime && (
+                <>
+                  {isHalfDay && (
+                    <span className="pill chip-warn">
+                      <CloudSun />
+                      Half day
+                    </span>
+                  )}
+                  {stats.status !== 'half-day' && (
+                    <StatusBadge status={stats.status} deltaMs={stats.deltaMs} targetMs={stats.targetMs} />
+                  )}
+                </>
+              )}
+              {isFullOff && (
+                <span className={`pill ${isLeave ? 'chip-leave' : 'chip-muted'}`}>
+                  {isLeave ? <Palmtree /> : <Sun />}
+                  {isLeave ? 'Leave' : 'Holiday'}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Content Section */}
@@ -342,7 +342,7 @@ export function DayCard({
         {dailyCheckoutAt && openSession && canTrackTime && (
           <div aria-live="polite" className="mb-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--accent-soft)] p-2.5 text-sm">
             <p className="font-medium text-[var(--text)]">
-              Expected checkout today:{' '}
+              Today's checkout time:{' '}
               <span className="font-bold text-[var(--accent)]">
                 {formatTimeOfDay(dailyCheckoutAt)}
               </span>

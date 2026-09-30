@@ -172,6 +172,25 @@ button:not(:disabled) {
   font-weight: 600;
 }
 
+.pill {
+  display: inline-flex;
+  height: 1.75rem;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: var(--radius-sm);
+  padding: 0 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.pill svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+
 .chip-accent { background: var(--accent-soft); color: var(--accent); }
 .chip-warn { background: var(--warn-soft); color: var(--warn); }
 .chip-good { background: var(--good-soft); color: var(--good); }

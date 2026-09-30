@@ -60,9 +60,9 @@ export function StatusBadge({
   const Icon = ICONS[status]
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-[var(--radius-sm)] px-2.5 py-1 text-sm font-semibold whitespace-nowrap ${STYLES[status]} ${className}`}
+      className={`pill ${STYLES[status]} ${className}`}
     >
-      <Icon className="h-3.5 w-3.5" />
+      <Icon />
       {label(status, deltaMs, targetMs)}
     </span>
   )
