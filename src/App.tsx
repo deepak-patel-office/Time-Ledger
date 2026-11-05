@@ -1,5 +1,17 @@
 import { useEffect, useState } from 'react'
-import { CalendarDays, CalendarOff, Menu, Moon, PanelLeftClose, Settings, Sun, TimerReset, X, AlertTriangle } from 'lucide-react'
+import {
+  CalendarDays,
+  CalendarOff,
+  Info,
+  Menu,
+  Moon,
+  PanelLeftClose,
+  Settings,
+  Sun,
+  TimerReset,
+  X,
+  AlertTriangle,
+} from 'lucide-react'
 import { AppDataProvider } from './context/AppDataProvider'
 import { useAppData } from './context/useAppData'
 import { WeeklyView } from './components/weekly/WeeklyView'
@@ -40,6 +52,7 @@ function AppContent() {
   const [tab, setTab] = useState<Tab>('weekly')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [theme, setTheme] = useState<Theme>(initialTheme)
+  const [storageWarningDismissed, setStorageWarningDismissed] = useState(false)
   const { saveError } = useAppData()
   const { notify } = useNotify()
   const pageCopy = PAGE_COPY[tab]
@@ -174,6 +187,31 @@ function AppContent() {
             </button>
           </div>
         </header>
+
+        {!storageWarningDismissed && (
+          <div
+            role="status"
+            className="border-b border-[var(--warn-border)] bg-[var(--warn-soft)] px-3.5 py-2.5 sm:px-6 lg:px-8"
+          >
+            <div className="mx-auto flex max-w-7xl items-start gap-2.5">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--warn)]" aria-hidden="true" />
+              <p className="min-w-0 flex-1 text-sm leading-snug text-[var(--text)]">
+                Your timesheet and leave data live only in this browser. Do not clear{' '}
+                <strong className="font-semibold">cookies or other site data</strong> for this site — that permanently
+                deletes everything and cannot be recovered.
+              </p>
+              <button
+                type="button"
+                onClick={() => setStorageWarningDismissed(true)}
+                aria-label="Dismiss warning for this session"
+                title="Dismiss for this session"
+                className="shrink-0 rounded-[var(--radius-sm)] p-1 text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {saveError && (
           <div
