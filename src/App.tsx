@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { AppDataProvider } from './context/AppDataProvider'
 import { useAppData } from './context/useAppData'
+import { HeaderWeekMetrics } from './components/weekly/HeaderWeekMetrics'
 import { WeeklyView } from './components/weekly/WeeklyView'
 import { TimeOffView } from './components/timeoff/TimeOffView'
 import { SettingsView } from './components/settings/SettingsView'
@@ -149,7 +150,7 @@ function AppContent() {
 
       <div className={`flex min-h-screen flex-1 flex-col transition-[padding] duration-200 ${sidebarOpen ? 'lg:pl-[17rem]' : ''}`}>
         <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--header-bg)] backdrop-blur-md">
-          <div className="mx-auto flex max-w-7xl items-center gap-3 px-3.5 py-2.5 sm:px-6 lg:px-8">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-2 px-3.5 py-2.5 sm:px-6 lg:px-8">
             <button
               type="button"
               onClick={() => setSidebarOpen((open) => !open)}
@@ -164,10 +165,12 @@ function AppContent() {
               <TimerReset className="h-4 w-4" aria-hidden="true" />
             </span>
 
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 basis-[8rem]">
               <h1 className="app-heading truncate">Time Ledger</h1>
               <p className="app-subhead truncate">Work hours tracker</p>
             </div>
+
+            {tab === 'weekly' && <HeaderWeekMetrics />}
 
             <span
               className="chip chip-accent max-w-[11rem] shrink-0 truncate sm:max-w-none"
@@ -229,11 +232,6 @@ function AppContent() {
           {tab === 'settings' && <SettingsView />}
         </main>
 
-        <footer className="border-t border-[var(--border)] bg-[var(--header-bg)]">
-          <p className="mx-auto max-w-7xl px-4 py-3 text-center text-sm text-[var(--text-muted)] sm:px-6 lg:px-8">
-            Made with <span aria-hidden="true">❤️</span> by Aditya Patel &amp; Team
-          </p>
-        </footer>
       </div>
     </div>
   )
